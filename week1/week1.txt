@@ -1,0 +1,253 @@
+<미션 기록>
+
+1. 리뷰 작성하는 쿼리
+    CREATE TABLE `리뷰` (
+    	`id`	biginit	NOT NULL,
+    	`user_id`	biginit	NOT NULL,
+    	`mission_id`	biginit	NOT NULL,
+    	`rating`	smallinit	NOT NULL,
+    	`content`	text	NOT NULL,
+    	`created_at`	timestamp	NOT NULL
+    );
+
+    START TRANSACTION;
+
+    INSERT INTO `리뷰` (
+      `id`, `user_id`, `mission_id`, `rating`, `content`, `created_at`
+    ) VALUES (
+      1001,
+      7,
+      42,
+      5,
+      '음 너무 맛있어요! 포인트도 얻고 행복한 식사였어요. 다음에 또 올게요!!',
+      NOW()
+    );
+
+
+2. 마이페이지 확인 쿼리
+    SELECT
+      u.`id`,
+      u.`name`         AS nickname,
+      u.`email`,
+      u.`phone_number`,
+      u.`created_at`   AS joined_at
+    FROM `유저` u
+    WHERE u.`id` = 7;
+
+
+    SELECT
+      (SELECT COUNT(*) FROM `리뷰` r        WHERE r.`user_id` = 7)                                        AS review_count,
+      (SELECT COUNT(*) FROM `문의하기` q     WHERE q.`user_id` = 7)                                        AS inquiry_count,
+      (SELECT COUNT(*) FROM `유저 미션` um   WHERE um.`user_id` = 7 AND um.`status` = 'IN_PROGRESS')       AS missions_in_progress,
+      (SELECT COUNT(*) FROM `유저 미션` um   WHERE um.`user_id` = 7 AND um.`status` = 'COMPLETE')          AS missions_completed;
+
+
+
+3. 내가 진행중, 진행 완료한 미션 모아서 보는 쿼리
+    SELECT
+      um.`user_id`,
+      um.`mission_id`,
+      um.`status`,
+      um.`progress`,
+      um.`completed_at`,
+      um.`end_at`,
+      m.`restaurant_name`,
+      m.`reward_point`,
+      m.`description`
+    FROM `유저 미션` um
+    JOIN `미션` m ON m.`id` = um.`mission_id`
+    WHERE um.`user_id` = 7
+      AND um.`status` IN ('IN_PROGRESS','COMPLETE')
+    ORDER BY
+      CASE um.`status`
+        WHEN 'IN_PROGRESS' THEN 1
+        WHEN 'COMPLETE'     THEN 2
+      END,
+      -- 진행중은 end_at 오름차순, 완료는 completed_at 내림차순
+      CASE um.`status`
+        WHEN 'IN_PROGRESS' THEN UNIX_TIMESTAMP(um.`end_at`)
+        ELSE 0
+      END ASC,
+      CASE um.`status`
+        WHEN 'COMPLETE' THEN um.`completed_at`
+        ELSE NULL
+      END DESC,
+      um.`mission_id` DESC
+    LIMIT 10 OFFSET 0;
+
+
+
+4. 홈화면 쿼리
+
+    SELECT COUNT(*) AS total
+    FROM `미션` m
+    LEFT JOIN `유저 미션` um
+      ON um.`mission_id` = m.`id` AND um.`user_id` = 7
+    WHERE m.`restaurant_name` LIKE '%서울 강남구%'
+      AND (um.`user_id` IS NULL OR um.`status` <> 'COMPLETE');
+
+
+    SELECT
+      m.`id`              AS mission_id,
+      m.`restaurant_name`,
+      m.`reward_point`,
+      m.`description`,
+      m.`created_at`,
+      um.`status`         AS my_status   -- NULL(미배정) or 'IN_PROGRESS'
+    FROM `미션` m
+    LEFT JOIN `유저 미션` um
+      ON um.`mission_id` = m.`id` AND um.`user_id` = 7
+    WHERE m.`restaurant_name` LIKE '%서울 강남구%'
+      AND (um.`user_id` IS NULL OR um.`status` <> 'COMPLETE')
+    ORDER BY m.`created_at` DESC, m.`id` DESC
+    LIMIT 10 OFFSET 0;
+
+
+
+<시니어 미션>
+
+Q1. 미션 1(내가 진행중, 진행 완료한 미션 모아서 보는 쿼리(페이징 포함))에서
+    정렬 기준을 1순위는 포인트로 2순위는 최신순으로 하여 Cursor기반 페이지네이션을 구현해보세요!
+
+    SELECT
+      um.`user_id`,
+      um.`mission_id`,
+      um.`status`,
+      um.`progress`,
+      um.`completed_at`,
+      um.`end_at`,
+      m.`restaurant_name`,
+      CAST(m.`reward_point` AS UNSIGNED) AS reward_point_int,
+      m.`description`,
+      m.`created_at`
+    FROM `유저 미션` um
+    JOIN `미션` m ON m.`id` = um.`mission_id`
+    WHERE um.`user_id` = 7
+      AND um.`status` IN ('IN_PROGRESS','COMPLETE')
+      AND (
+            CAST(m.`reward_point` AS UNSIGNED) < 500
+         OR (CAST(m.`reward_point` AS UNSIGNED) = 500
+             AND GREATEST(COALESCE(um.`completed_at`, '1970-01-01'),
+                          COALESCE(um.`end_at`,       '1970-01-01')) < '2025-09-10 12:00:00')
+         OR (CAST(m.`reward_point` AS UNSIGNED) = 500
+             AND GREATEST(COALESCE(um.`completed_at`, '1970-01-01'),
+                          COALESCE(um.`end_at`,       '1970-01-01')) = '2025-09-10 12:00:00'
+             AND um.`mission_id` < 42)
+      )
+    ORDER BY
+      reward_point_int DESC,
+      GREATEST(
+        COALESCE(um.`completed_at`, '1970-01-01'),
+        COALESCE(um.`end_at`,       '1970-01-01')
+      ) DESC,
+      um.`mission_id` DESC
+    LIMIT 10;
+
+
+
+    사용자 7의 진행중/완료 미션을 미션 정보와 조인해서 한 번에 가져옴.
+
+    SELECT 절에 restaurant_name, reward_point, description 등 화면에 필요한 필드를 모아둠.
+
+    1. 정렬 키(순서) – “1순위 포인트, 2순위 최신순, 3순위 타이브레이커”
+
+    ```jsx
+    CAST(m.`reward_point` AS UNSIGNED) AS reward_point_int,
+    GREATEST(
+      COALESCE(um.`completed_at`, '1970-01-01'),
+      COALESCE(um.`end_at`,       '1970-01-01')
+    ) DESC,
+    um.`mission_id` DESC
+    ```
+
+    왜 이렇게?
+
+    1순위: 포인트 내림차순
+    reward_point가 VARCHAR(20)라서 숫자 정렬을 하려면 CAST(... AS UNSIGNED) 로 정수 변환이 필요
+
+    2순위: 최신순 내림차순
+    진행중(IN_PROGRESS)에는 보통 completed_at이 NULL, 완료(COMPLETE)에만 값이 있음.
+    그래서 두 시간 중 더 큰 쪽(=사실상 완료면 completed_at, 진행중이면 end_at)을 GREATEST()로 뽑아 하나의 정렬 키로 통일.
+
+    3순위: mission_id 내림차순 타이브레이커
+    포인트와 시간까지 완전히 같은 행들이 있을 때 결정적 순서(deterministic order)를 보장해.
+    이게 있어야 커서 비교가 안정적으로 동작(중복·누락 방지).
+
+    COALESCE(..., '1970-01-01')는 NULL 대비용 기본값.
+    (시간 비교에서 NULL이 껴도 정렬/비교가 잘 되도록 방어)
+
+    커서 = 마지막 행의 (포인트, 최신시각, 미션ID) WHERE로 해당 튜플보다 뒤쪽만 걸러내고,
+
+    동일한 ORDER BY로 다음 N개를 가져오는 Seek 페이징 쿼리.
+
+    성능을 위해서는 정수 포인트 컬럼/생성 컬럼 + 적절한 복합 인덱스를 꼭 같이 고려하자.
+
+
+
+Q2. 다양한 트랜젝션 상태와, 트랜젝션 전파에 대해 조사해주세요!
+
+        1. 트랜잭션 상태
+
+        (1) **Active (활성)**
+
+        - 트랜잭션이 시작되어 작업(SQL 실행)이 진행 중인 상태
+
+        (2) **Partially Committed (부분 커밋)**
+
+        - 마지막 연산(SQL)이 끝나고, 커밋 직전 단계
+        - 실제 DB에 영구 반영되기 직전이라 아직 실패 가능성 존재
+
+        (3) **Committed (커밋 완료)**
+
+        - commit 명령으로 트랜잭션이 정상 종료
+        - 변경 내용이 DB에 영구 반영됨
+
+        (4) **Failed (실패)**
+
+        - 실행 중 오류(제약 조건 위배, DB 장애 등) 발생 → 더 이상 진행 불가
+        - 트랜잭션은 반드시 **ROLLBACK** 되어야 함
+
+        (5) **Aborted (중단)**
+
+        - 실패로 인해 트랜잭션이 취소(ROLLBACK)
+        - DB는 트랜잭션 시작 전 상태로 되돌아감
+
+        2. 트랜잭션 전파
+
+        스프링(Spring) 프레임워크 같은 환경에서 메서드 호출 시 기존 트랜잭션을 어떻게 이어갈 것인가?를 결정하는 옵션
+
+
+
+Q3. 함수 기반 인덱스와 복합 인덱스에 대해 조사하고,
+성능상 이점과 단점을 적어주세요!
+
+        1. 함수 기반 인덱스
+
+        컬럼에 특정 연산(함수) 을 적용한 결과값을 인덱스로 만들어둠.
+
+        [장점]
+
+        - 함수 결과로 조건 검색 가능
+        - 계산을 저장하므로 실행 시 연산 부하 감소.
+        - 파생 컬럼을 굳이 테이블에 두지 않아도 됨.
+
+        [단점]
+
+        - MySQL은 8.0부터 함수 기반 인덱스로 제한적으로 지원.
+        - 비결정성 함수(NOW(), RAND() 등)는 인덱스 불가.
+        - INSERT/UPDATE 시마다 함수 재계산 후 인덱스 갱신 필요.
+        - 복잡한 함수일 경우 인덱스 크기/갱신 오버헤드가 커짐.
+
+        2. 복합 인덱스
+
+        여러 컬럼을 묶어 하나의 인덱스를 만듦.
+
+        [장점]
+
+        - 다중 조건 쿼리 속도 향상
+        - 정렬까지 최적화 가능
+
+        [단점]
+
+        - 컬럼 순서 의존성(prefix rule)
+        - 인덱스가 커지고 쓰기 성능 저하

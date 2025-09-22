@@ -1,0 +1,253 @@
+<미션 기록>
+
+CREATE TABLE `유저 미션` (
+	`user_id`	biginit	NOT NULL,
+	`mission_id`	biginit	NOT NULL,
+	`status`	enum('IN_PROGRESS', 'COMPLETE')	NOT NULL,
+	`progress`	init	NOT NULL,
+	`completed_at`	timestamp	NOT NULL,
+	`end_at`	date	NOT NULL
+);
+
+CREATE TABLE `리뷰` (
+	`id`	biginit	NOT NULL,
+	`user_id`	biginit	NOT NULL,
+	`mission_id`	biginit	NOT NULL,
+	`rating`	smallinit	NOT NULL,
+	`content`	text	NOT NULL,
+	`created_at`	timestamp	NOT NULL
+);
+
+CREATE TABLE `문의하기` (
+	`id`	biginit	NOT NULL,
+	`user_id`	biginit	NOT NULL,
+	`title`	varchar(255)	NOT NULL,
+	`content`	text	NOT NULL
+);
+
+CREATE TABLE `문의하기 이미지` (
+	`id`	biginit	NOT NULL,
+	`inquiries_id`	biginit	NOT NULL,
+	`user_id`	biginit	NOT NULL,
+	`photo_url`	text	NOT NULL,
+	`created_at`	timestamp	NOT NULL
+);
+
+CREATE TABLE `리뷰 사진` (
+	`id`	VARCHAR(255)	NOT NULL,
+	`reviews_id`	biginit	NOT NULL,
+	`user_id`	biginit	NOT NULL,
+	`mission_id`	biginit	NOT NULL,
+	`photo_url`	test	NOT NULL,
+	`created_at`	timestamp	NOT NULL
+);
+
+CREATE TABLE `유저` (
+	`id`	biginit	NOT NULL,
+	`name`	varchar(40)	NOT NULL,
+	`gender`	varchar(20)	NOT NULL,
+	`birthDate`	date	NOT NULL,
+	`address`	varchar(255)	NOT NULL,
+	`email`	text	NOT NULL,
+	`phone_number`	varchar(50)	NOT NULL,
+	`created_at`	datetime(6)	NOT NULL,
+	`updated_at`	datetime(6)	NOT NULL,
+	`status`	varchar(15)	NOT NULL,
+	`inactive_date`	datetime	NOT NULL
+);
+
+CREATE TABLE `미션` (
+	`id`	biginit	NOT NULL,
+	`restaurant_name`	varchar(255)	NOT NULL,
+	`reward_point`	varchar(20)	NOT NULL,
+	`description`	text	NOT NULL,
+	`status`	enum('SUCCESS', 'FAIL')	NOT NULL,
+	`created_at`	datetime(6)	NOT NULL
+);
+
+CREATE TABLE `선호하는 음식 종류` (
+	`Key`	VARCHAR(255)	NOT NULL,
+	`user_id`	biginit	NOT NULL,
+	`foods_type_id`	biginit	NOT NULL
+);
+
+CREATE TABLE `음식 종류` (
+	`id`	biginit	NOT NULL,
+	`name`	varchar(50)	NOT NULL
+);
+
+ALTER TABLE `유저 미션` ADD CONSTRAINT `PK_유저 미션` PRIMARY KEY (
+	`user_id`,
+	`mission_id`
+);
+
+ALTER TABLE `리뷰` ADD CONSTRAINT `PK_리뷰` PRIMARY KEY (
+	`id`,
+	`user_id`,
+	`mission_id`
+);
+
+ALTER TABLE `문의하기` ADD CONSTRAINT `PK_문의하기` PRIMARY KEY (
+	`id`,
+	`user_id`
+);
+
+ALTER TABLE `문의하기 이미지` ADD CONSTRAINT `PK_문의하기 이미지` PRIMARY KEY (
+	`id`,
+	`inquiries_id`,
+	`user_id`
+);
+
+ALTER TABLE `리뷰 사진` ADD CONSTRAINT `PK_리뷰 사진` PRIMARY KEY (
+	`id`,
+	`reviews_id`,
+	`user_id`,
+	`mission_id`
+);
+
+ALTER TABLE `유저` ADD CONSTRAINT `PK_유저` PRIMARY KEY (
+	`id`
+);
+
+ALTER TABLE `미션` ADD CONSTRAINT `PK_미션` PRIMARY KEY (
+	`id`
+);
+
+ALTER TABLE `선호하는 음식 종류` ADD CONSTRAINT `PK_선호하는 음식 종류` PRIMARY KEY (
+	`Key`,
+	`user_id`,
+	`foods_type_id`
+);
+
+ALTER TABLE `음식 종류` ADD CONSTRAINT `PK_음식 종류` PRIMARY KEY (
+	`id`
+);
+
+ALTER TABLE `유저 미션` ADD CONSTRAINT `FK_유저_TO_유저 미션_1` FOREIGN KEY (
+	`user_id`
+)
+REFERENCES `유저` (
+	`id`
+);
+
+ALTER TABLE `유저 미션` ADD CONSTRAINT `FK_미션_TO_유저 미션_1` FOREIGN KEY (
+	`mission_id`
+)
+REFERENCES `미션` (
+	`id`
+);
+
+ALTER TABLE `리뷰` ADD CONSTRAINT `FK_유저_TO_리뷰_1` FOREIGN KEY (
+	`user_id`
+)
+REFERENCES `유저` (
+	`id`
+);
+
+ALTER TABLE `리뷰` ADD CONSTRAINT `FK_미션_TO_리뷰_1` FOREIGN KEY (
+	`mission_id`
+)
+REFERENCES `미션` (
+	`id`
+);
+
+ALTER TABLE `문의하기` ADD CONSTRAINT `FK_유저_TO_문의하기_1` FOREIGN KEY (
+	`user_id`
+)
+REFERENCES `유저` (
+	`id`
+);
+
+ALTER TABLE `문의하기 이미지` ADD CONSTRAINT `FK_문의하기_TO_문의하기 이미지_1` FOREIGN KEY (
+	`inquiries_id`
+)
+REFERENCES `문의하기` (
+	`id`
+);
+
+ALTER TABLE `문의하기 이미지` ADD CONSTRAINT `FK_문의하기_TO_문의하기 이미지_2` FOREIGN KEY (
+	`user_id`
+)
+REFERENCES `문의하기` (
+	`user_id`
+);
+
+ALTER TABLE `리뷰 사진` ADD CONSTRAINT `FK_리뷰_TO_리뷰 사진_1` FOREIGN KEY (
+	`reviews_id`
+)
+REFERENCES `리뷰` (
+	`id`
+);
+
+ALTER TABLE `리뷰 사진` ADD CONSTRAINT `FK_리뷰_TO_리뷰 사진_2` FOREIGN KEY (
+	`user_id`
+)
+REFERENCES `리뷰` (
+	`user_id`
+);
+
+ALTER TABLE `리뷰 사진` ADD CONSTRAINT `FK_리뷰_TO_리뷰 사진_3` FOREIGN KEY (
+	`mission_id`
+)
+REFERENCES `리뷰` (
+	`mission_id`
+);
+
+ALTER TABLE `선호하는 음식 종류` ADD CONSTRAINT `FK_유저_TO_선호하는 음식 종류_1` FOREIGN KEY (
+	`user_id`
+)
+REFERENCES `유저` (
+	`id`
+);
+
+ALTER TABLE `선호하는 음식 종류` ADD CONSTRAINT `FK_음식 종류_TO_선호하는 음식 종류_1` FOREIGN KEY (
+	`foods_type_id`
+)
+REFERENCES `음식 종류` (
+	`id`
+);
+
+
+
+
+<시니어 미션>
+
+Q1. 미션 자료로 제공된 피그마를 보고 ERD를 설계한 후 제 1,2,3 정규화를 통해 제 1,2,3 정규형을 만들고
+각각 중복된 데이터가 어떻게 변화하였고 어떠한 이점이 있었는 지 작성하여 주세요
+미션 자료로 제공된 피그마를 보고 ERD를 설계한 후 제 1,2,3 정규화를 통해 제 1,2,3 정규형을 만들고
+각각 중복된 데이터가 어떻게 변화하였고 어떠한 이점이 있었는 지 작성하여 주세요
+
+-> 1. 제 1 정규화 → ERD에 반영됨.
+   - user_foods_type이 없고, User 안에 선호 음식이 문자열로 들어가면 원자값 위배 되지만, 생성한 erd에는 잘 나뉘어 있음.
+   - inquiry_photos, review_photots 없이 inquiries/reviews 안에 사진 여러 장 문자열로 저장하면 원자값 위배 되지만, 생성한 erd에는 잘 나뉘어 있음.
+
+   [이점]
+
+   - 한 사용자가 선호 음식을 자유롭게 추가/삭제 가능.
+
+   1. 제 2 정규화 → ERD에 반영됨.
+   - user_missions 테이블의 기본키는 (user_id, mission_id)인데, 만약 restaurant_name 같은 속성이 같이 들어간다면, 이 값은 mission_id 에만 종속되고 user_id 와는 관계가 없으므로 부분 함수 종속이 발생한다.
+
+   → user_Missions는 (user_id, mission_id) 와 미션 상태, 완료일, 마감일 등만 유지 → 미션 자체 속성은 Missions에만 둠.
+
+   [이점]
+
+   - 미션의 속성 변경 시, Missions 만 업데이트하면 됨.
+
+   1. 제 3 정규화
+   - User 테이블의 inactive_date는 status = ‘INACTIVE’ 일때만 의미가 있음 → 이행 종속 관계
+
+       → 별도의 user_status_history 테이블로 분리
+
+       [이점]
+
+       - 상태와 날짜 불일치 같은 데이터 불일치 방지.
+
+
+
+
+Q2. 피그마의 홈 부분에서 한 사람이 “미션 도전!” 버튼을 빠르게 여러 번 눌렀을 때
+여러 가지 이유(비동기 로직 등)로 요청이 지연되어 완전히 처리하기 전 두 번 요청이 들어갈 수 있습니다.
+이를 해결할 수 있는 방법에 대해 작성하여 주세요 (ERD 직접적으로 관련이 있기보다는 설계할 때 한번쯤 고민해보면 좋을 것 추가시켜 놓았습니다) (다양한 방법이 있으니 찾아봐 주세요)
+
+-> user_Missions 테이블에서 사용자의 미션 요청이 동시에 2번 들어가지 않도록, UNIQUE(user_id, mission_id)로 DB 설정한다.
