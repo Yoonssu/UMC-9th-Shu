@@ -1,0 +1,45 @@
+package com.example.umc9th.domain.mission.entity;
+
+import com.example.umc9th.domain.member.entity.User;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+@Table(name = "usermissions")
+@IdClass(UserMissionId.class)
+public class UserMission {
+
+    @Id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mission_id", nullable = false)
+    private com.example.umc9th.domain.mission.entity.Mission mission;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
+
+    @Column(nullable = false)
+    private Integer progress;
+
+    @Column(nullable = false)
+    private LocalDateTime completedAt;
+
+    @Column(nullable = false)
+    private LocalDate endAt;
+
+    public enum Status {
+        IN_PROGRESS, COMPLETE
+    }
+}
