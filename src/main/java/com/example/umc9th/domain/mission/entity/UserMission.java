@@ -1,6 +1,6 @@
 package com.example.umc9th.domain.mission.entity;
 
-import com.example.umc9th.domain.member.entity.User;
+import com.example.umc9th.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,8 +18,8 @@ public class UserMission {
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)

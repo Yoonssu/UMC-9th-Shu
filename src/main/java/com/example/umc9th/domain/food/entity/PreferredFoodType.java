@@ -2,7 +2,7 @@ package com.example.umc9th.domain.food.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.example.umc9th.domain.member.entity.User;
+import com.example.umc9th.domain.member.entity.Member;
 
 @Entity
 @Table(name = "preferredfoodtype")
@@ -17,9 +17,9 @@ public class PreferredFoodType {
     private PreferredFoodTypeId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
-    @JoinColumn(name = "user_id")
-    private User user;
+    @MapsId("memberId")
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("foodTypeId")
