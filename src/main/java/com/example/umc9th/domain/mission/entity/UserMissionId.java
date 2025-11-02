@@ -10,6 +10,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class UserMissionId implements Serializable {
-    private Long user;
+    private Long member;
     private Long mission;
 }
