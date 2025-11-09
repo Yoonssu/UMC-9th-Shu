@@ -6,7 +6,7 @@
   </component>
   <component name="DBNavigator.Project.DataEditorManager">
     <record-view-column-sorting-type value="BY_INDEX" />
-    <value-preview-text-wrapping value="true" />
+    <value-preview-text-wrapping value="false" />
     <value-preview-pinned value="false" />
   </component>
   <component name="DBNavigator.Project.DatabaseBrowserManager">
@@ -17,7 +17,33 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="d31ac117-2465-4ce0-8759-60408a4a84b7">
-      <console name="Connection" type="STANDARD" schema="umc9th" session="Main" />
+      <console name="Connection" type="STANDARD" schema="umc9th" session="Main"><![CDATA[SELECT 
+    s.name AS store_name,
+    r.rating AS rating,
+    r.content AS review_message,
+    r.created_at AS written_date
+FROM reviews r
+JOIN missions m ON r.mission_id = m.id
+JOIN stores s ON m.store_id = s.id
+WHERE s.name = '라화쿵푸 마라탕'
+ORDER BY r.rating DESC, r.created_at DESC;
+
+
+SELECT 
+    s.name AS store_name,
+    r.rating AS rating,
+    r.content AS review_message,
+    r.created_at AS written_date
+FROM reviews r
+JOIN missions m ON r.mission_id = m.id
+JOIN stores s ON m.store_id = s.id
+WHERE r.rating IN (
+    SELECT rating
+    FROM reviews
+    GROUP BY rating
+    HAVING COUNT(*) > 1
+)
+ORDER BY r.rating DESC, s.name ASC, r.created_at DESC;]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -30,6 +56,16 @@
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="d31ac117-2465-4ce0-8759-60408a4a84b7" />
+  </component>
+  <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="d31ac117-2465-4ce0-8759-60408a4a84b7" dataset="umc9th.reviews" active-filter-id="">
+      <filter id="89e23038-f8bc-4d48-9f9a-08ec404551bd" name="Filter 1" temporary="false" custom-name="false" type="basic" join-type="AND">
+        <condition column="id" operator="=" value="" active="true" />
+      </filter>
+    </filter-actions>
+  </component>
+  <component name="DBNavigator.Project.ExecutionManager">
+    <retain-sticky-names value="false" />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
@@ -525,5 +561,9 @@
         </visibility-settings>
       </environment>
     </general-settings>
+  </component>
+  <component name="DBNavigator.Project.StatementExecutionManager">
+    <execution-variables />
+    <execution-variable-types />
   </component>
 </project>
