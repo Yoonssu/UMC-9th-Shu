@@ -14,6 +14,6 @@ public class PreferredFoodTypeId implements Serializable {
     @Column(name = "food_key", length = 255)  // 예약어 회피
     private String key;
 
-    private Long userId;
+    private Long memberId;
     private Long foodTypeId;
 }

@@ -1,6 +1,7 @@
 package com.example.umc9th.domain.mission.entity;
 
 
+import com.example.umc9th.domain.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +34,10 @@ public class Mission {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;  // Store 엔티티 연결
 
     public enum MissionStatus {
         SUCCESS, FAIL
