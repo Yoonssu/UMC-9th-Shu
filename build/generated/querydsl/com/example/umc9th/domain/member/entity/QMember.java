@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.core.types.PathMetadata;
 import com.querydsl.core.annotations.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -30,7 +31,7 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath email = createString("email");
 
-    public final StringPath gender = createString("gender");
+    public final EnumPath<com.example.umc9th.domain.member.enums.Gender> gender = createEnum("gender", com.example.umc9th.domain.member.enums.Gender.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -40,7 +41,9 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath phoneNumber = createString("phoneNumber");
 
-    public final StringPath status = createString("status");
+    public final ListPath<Long, NumberPath<Long>> preferCategory = this.<Long, NumberPath<Long>>createList("preferCategory", Long.class, NumberPath.class, PathInits.DIRECT2);
+
+    public final EnumPath<com.example.umc9th.domain.member.enums.MemberStatus> status = createEnum("status", com.example.umc9th.domain.member.enums.MemberStatus.class);
 
     public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 

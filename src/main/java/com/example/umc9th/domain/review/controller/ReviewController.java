@@ -1,7 +1,13 @@
 package com.example.umc9th.domain.review.controller;
 
+import com.example.umc9th.domain.review.dto.ReviewReqDTO;
+import com.example.umc9th.domain.review.dto.ReviewResDTO;
 import com.example.umc9th.domain.review.entity.Review;
+import com.example.umc9th.domain.review.exception.code.ReviewSuccessCode;
+import com.example.umc9th.domain.review.service.ReviewCommandService;
 import com.example.umc9th.domain.review.service.ReviewService;
+import com.example.umc9th.global.apiPayload.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,19 +15,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/stores")
 @RequiredArgsConstructor
-@RequestMapping("/reviews")
 public class ReviewController {
 
-    private final ReviewService reviewService;
+    private final ReviewCommandService reviewCommandService;
 
-    @GetMapping("/me")
-    public ResponseEntity<List<Review>> getMyReviews(
-            @RequestParam Long memberId,
-            @RequestParam(required = false) String storeName,
-            @RequestParam(required = false) Integer rating
+    // 2. 가게에 리뷰 추가하기 API
+    @PostMapping("/{storeId}/reviews")
+    public ApiResponse<ReviewResDTO.CreateResDTO> createReview(
+            @PathVariable Long storeId,
+            @RequestBody @Valid ReviewReqDTO.CreateDTO dto
     ) {
-        List<Review> reviews = reviewService.getMyFilteredReviews(memberId, storeName, rating);
-        return ResponseEntity.ok(reviews);
+        return ApiResponse.onSuccess(
+                ReviewSuccessCode.CREATED,
+                reviewCommandService.createReview(storeId, dto)
+        );
     }
 }
