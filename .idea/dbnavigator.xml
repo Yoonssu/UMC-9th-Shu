@@ -50,9 +50,7 @@ ORDER BY r.rating DESC, s.name ASC, r.created_at DESC;]]></console>
     <last-used-providers />
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="d31ac117-2465-4ce0-8759-60408a4a84b7" object-ref="consoles/Connection" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="d31ac117-2465-4ce0-8759-60408a4a84b7" />

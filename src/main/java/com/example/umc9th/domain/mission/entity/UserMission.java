@@ -42,4 +42,10 @@ public class UserMission {
     public enum Status {
         IN_PROGRESS, COMPLETE
     }
+
+    public void complete() {
+        this.status = Status.COMPLETE;
+        this.completedAt = LocalDateTime.now();
+    }
+
 }

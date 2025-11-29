@@ -3,6 +3,7 @@ package com.example.umc9th.domain.food.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.*;
+
 import java.io.Serializable;
 
 @Embeddable
@@ -10,10 +11,12 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class PreferredFoodTypeId implements Serializable {
-    @Column(name = "food_key", length = 255)  // 예약어 회피
-    private String key;
 
-    private Long memberId;
-    private Long foodTypeId;
+    @Column(name = "member_id")
+    private Long memberId;      // Member PK (Long)
+
+    @Column(name = "foods_type_id")
+    private Long foodTypeId;    // FoodType PK (Long)
 }

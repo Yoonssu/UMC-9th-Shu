@@ -1,6 +1,7 @@
 package com.example.umc9th.domain.mission.entity;
 
 
+import com.example.umc9th.domain.mission.enums.MissionStatus;
 import com.example.umc9th.domain.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,9 +29,6 @@ public class Mission {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MissionStatus status;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -39,7 +37,7 @@ public class Mission {
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;  // Store 엔티티 연결
 
-    public enum MissionStatus {
-        SUCCESS, FAIL
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MissionStatus status;
 }
