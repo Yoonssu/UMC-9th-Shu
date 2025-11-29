@@ -20,6 +20,9 @@ import com.example.umc9th.domain.store.exception.StoreException;
 import com.example.umc9th.domain.store.exception.code.StoreErrorCode;
 import com.example.umc9th.domain.store.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +50,21 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         return MissionConverter.toCreateResDTO(saved);
     }
 
-    // 4번 challengeMission 구현
+    @Override
+    public MissionResDTO.MissionPageDTO findMissionsByStore(Long storeId, Integer page) {
+
+        int zeroBasedPage = (page == null || page < 1) ? 0 : page - 1;
+        PageRequest pageRequest = PageRequest.of(
+                zeroBasedPage,
+                10,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<Mission> missions = missionRepository.findByStoreId(storeId, pageRequest);
+        return MissionConverter.toMissionPageDTO(missions);
+    }
+
+    // 4. 미션 도전
     @Override
     @Transactional
     public MemberMissionResDTO.ChallengeResDTO challengeMission(Long missionId) {
@@ -67,7 +84,46 @@ public class MissionCommandServiceImpl implements MissionCommandService {
         UserMission userMission = UserMissionConverter.toEntity(member, mission);
         UserMission saved = userMissionRepository.save(userMission);
 
-        return UserMissionConverter.toChallengeResDTO(saved);
+        // 여기서 DTO 직접 생성
+        return new MemberMissionResDTO.ChallengeResDTO(
+                member.getId(),
+                mission.getId(),
+                mission.getRestaurantName(),
+                mission.getRewardPoint(),
+                saved.getStatus(),          // IN_PROGRESS
+                saved.getProgress(),
+                saved.getEndAt()
+        );
     }
 
+    // 5. 미션 완료
+    @Override
+    @Transactional
+    public MemberMissionResDTO.CompleteResDTO completeMission(Long missionId) {
+
+        Member member = memberRepository.findById(HARD_CODED_MEMBER_ID)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+        UserMission userMission = userMissionRepository
+                .findByMember_IdAndMission_IdAndStatus(
+                        member.getId(),
+                        missionId,
+                        UserMission.Status.IN_PROGRESS
+                )
+                .orElseThrow(() -> new MissionException(MissionErrorCode.NOT_FOUND));
+
+        // 완료 처리
+        userMission.complete();   // status = COMPLETE, completedAt = now
+
+        return new MemberMissionResDTO.CompleteResDTO(
+                member.getId(),
+                userMission.getMission().getId(),
+                userMission.getMission().getRestaurantName(),
+                userMission.getMission().getRewardPoint(),
+                userMission.getStatus(),              // COMPLETE
+                userMission.getProgress(),
+                userMission.getCompletedAt(),
+                userMission.getEndAt()
+        );
+    }
 }

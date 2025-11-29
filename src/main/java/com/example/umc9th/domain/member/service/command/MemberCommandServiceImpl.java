@@ -28,38 +28,31 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final FoodTypeRepository foodTypeRepository;
     private final PreferredFoodTypeRepository preferredFoodTypeRepository;
 
-    // 회원가입
     @Override
     @Transactional
-    public MemberResDTO.JoinResDTO signup(
-            MemberReqDTO.JoinReqDTO dto
-    ){
-        // 사용자 생성
+    public MemberResDTO.JoinResDTO signup(MemberReqDTO.JoinReqDTO dto) {
+
+        // 1. 회원 생성 & 저장
         Member member = MemberConverter.toMember(dto);
-        // DB 적용
         Member savedMember = memberRepository.save(member);
 
-        // 선호 음식 존재 여부 확인
+        // 2. 선호 음식 있으면 처리
         if (dto.preferCategory() != null && !dto.preferCategory().isEmpty()) {
 
             List<PreferredFoodType> preferredList = new ArrayList<>();
 
-            // 선호 음식 ID별 조회
-            for (Long foodTypeId : dto.preferCategory()){
+            // preferCategory: List<Long> (FoodType PK 리스트)
+            for (Long foodTypeId : dto.preferCategory()) {
 
-                // 음식 존재 여부 검증
+                // 2-1. FoodType 존재 확인
                 FoodType foodType = foodTypeRepository.findById(foodTypeId)
                         .orElseThrow(() -> new FoodTypeException(FoodTypeErrorCode.NOT_FOUND));
 
-                //복합키 생성
-                String key = savedMember.getId() + "-" + foodType.getId();
-                PreferredFoodTypeId preferredId = new PreferredFoodTypeId(
-                        key,
-                        savedMember.getId(),
-                        foodType.getId()
-                );
+                // 2-2. 복합키 생성 (memberId + foodTypeId)
+                PreferredFoodTypeId preferredId =
+                        new PreferredFoodTypeId(savedMember.getId(), foodType.getId());
 
-                //PreferredFoodType 엔티티 생성
+                // 2-3. PreferredFoodType 엔티티 생성
                 PreferredFoodType preferred = PreferredFoodType.builder()
                         .id(preferredId)
                         .member(savedMember)
@@ -69,12 +62,11 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 preferredList.add(preferred);
             }
 
-            // 모든 선호 음식 추가: DB 적용
+            // 3. 한 번에 저장
             preferredFoodTypeRepository.saveAll(preferredList);
         }
 
-
-        // 응답 DTO 생성
+        // 4. 응답 DTO
         return MemberConverter.toJoinResDTO(savedMember);
     }
 }

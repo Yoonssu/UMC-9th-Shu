@@ -7,9 +7,8 @@ import com.example.umc9th.domain.member.entity.Member;
 @Entity
 @Table(name = "preferredfoodtype")
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class PreferredFoodType {
 
@@ -17,12 +16,12 @@ public class PreferredFoodType {
     private PreferredFoodTypeId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("memberId")
+    @MapsId("memberId")                 // PK의 memberId와 매핑
     @JoinColumn(name = "member_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("foodTypeId")
+    @MapsId("foodTypeId")               // PK의 foodTypeId와 매핑
     @JoinColumn(name = "foods_type_id")
     private FoodType foodType;
 }

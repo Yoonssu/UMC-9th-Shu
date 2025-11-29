@@ -59,5 +59,5 @@ public class Member {
 
     //선호 카테고리 선택 받고 싶을 때
     @Column(nullable = false)
-    private List<Long> preferCategory;
+    private String preferCategory;
 }
