@@ -20,9 +20,20 @@ public class MemberReqDTO {
             String address,
             @NotNull
             String email,
+            @NotBlank
+            String password,
             @NotNull
             String phoneNumber,
             @ExistFoods
             List<Long> preferCategory
     ){}
+
+    // 로그인
+    public record LoginDTO(
+            @NotBlank
+            String email,
+            @NotBlank
+            String password
+    ){}
 }
+

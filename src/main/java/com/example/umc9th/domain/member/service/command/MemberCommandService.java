@@ -9,4 +9,5 @@ public interface MemberCommandService {
             MemberReqDTO.JoinReqDTO dto
 
     );
+
 }

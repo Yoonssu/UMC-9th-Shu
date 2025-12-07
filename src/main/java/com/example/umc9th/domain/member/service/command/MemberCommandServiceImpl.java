@@ -13,7 +13,9 @@ import com.example.umc9th.domain.member.dto.MemberResDTO;
 import com.example.umc9th.domain.member.entity.Member;
 import com.example.umc9th.domain.member.repository.MemberRepository;
 import com.example.umc9th.domain.member.service.command.MemberCommandService;
+import com.example.umc9th.global.auth.enums.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,13 +29,18 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final MemberRepository memberRepository;
     private final FoodTypeRepository foodTypeRepository;
     private final PreferredFoodTypeRepository preferredFoodTypeRepository;
+    // Password Encoder
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public MemberResDTO.JoinResDTO signup(MemberReqDTO.JoinReqDTO dto) {
 
+        // 솔트된 비밀번호 생성
+        String salt = passwordEncoder.encode(dto.password());
+
         // 1. 회원 생성 & 저장
-        Member member = MemberConverter.toMember(dto);
+        Member member = MemberConverter.toMember(dto, salt, Role.ROLE_USER);
         Member savedMember = memberRepository.save(member);
 
         // 2. 선호 음식 있으면 처리

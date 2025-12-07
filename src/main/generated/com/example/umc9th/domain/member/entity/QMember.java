@@ -38,9 +38,13 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath name = createString("name");
 
+    public final StringPath password = createString("password");
+
     public final StringPath phoneNumber = createString("phoneNumber");
 
     public final StringPath preferCategory = createString("preferCategory");
+
+    public final EnumPath<com.example.umc9th.global.auth.enums.Role> role = createEnum("role", com.example.umc9th.global.auth.enums.Role.class);
 
     public final EnumPath<com.example.umc9th.domain.member.enums.MemberStatus> status = createEnum("status", com.example.umc9th.domain.member.enums.MemberStatus.class);
 

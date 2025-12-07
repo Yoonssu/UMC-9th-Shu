@@ -1,15 +1,16 @@
 package com.example.umc9th.domain.member.converter;
 
-import com.example.umc9th.domain.member.enums.MemberStatus;
 import com.example.umc9th.domain.member.dto.MemberReqDTO;
 import com.example.umc9th.domain.member.dto.MemberResDTO;
 import com.example.umc9th.domain.member.entity.Member;
+import com.example.umc9th.domain.member.enums.MemberStatus;
+import com.example.umc9th.global.auth.enums.Role;
 
 import java.time.LocalDateTime;
 
 public class MemberConverter {
 
-    // db에 저장된 member 엔티티를 클라이언트에게 돌려줄 응답 dto로 변환
+    // 회원가입 응답 DTO 변환
     public static MemberResDTO.JoinResDTO toJoinResDTO(Member member) {
         return new MemberResDTO.JoinResDTO(
                 member.getId(),
@@ -20,10 +21,18 @@ public class MemberConverter {
         );
     }
 
-    // 클라이언트에서 들어온 json을 joindto -> member 엔티티로 변환해서 db에 저장 가능하도록 함
-    public static Member toMember(MemberReqDTO.JoinReqDTO dto) {
+    // 로그인 응답 DTO 변환
+    public static MemberResDTO.LoginDTO toLoginDTO(Member member, String accessToken) {
+        return MemberResDTO.LoginDTO.builder()
+                .memberId(member.getId())
+                .accessToken(accessToken)
+                .build();
+    }
 
-        LocalDateTime now = LocalDateTime.now(); //가입 시점이나, 업데이트 시점에 넣어줌
+    // 회원가입 요청 DTO → Member 엔티티 변환
+    public static Member toMember(MemberReqDTO.JoinReqDTO dto, String encodedPassword, Role role) {
+
+        LocalDateTime now = LocalDateTime.now(); // 가입/수정 시점
 
         return Member.builder()
                 .name(dto.name())
@@ -31,10 +40,13 @@ public class MemberConverter {
                 .birthDate(dto.birthDate())
                 .address(dto.address())
                 .email(dto.email())
+                .password(encodedPassword)       // 인코딩된 비밀번호
+                .role(role)                      // 보통 ROLE_USER
                 .phoneNumber(dto.phoneNumber())
                 .createdAt(now)
                 .updatedAt(now)
-                // preferCategory 매핑은 JPA 매핑 설계 끝나고 추가하는 게 안전
+                .status(MemberStatus.ACTIVE)     // 기본 값
+                // preferCategory는 PreferredFoodType으로 별도 관리
                 .build();
     }
 }

@@ -2,6 +2,7 @@ package com.example.umc9th.domain.member.entity;
 
 import com.example.umc9th.domain.member.enums.Gender;
 import com.example.umc9th.domain.member.enums.MemberStatus;
+import com.example.umc9th.global.auth.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -37,6 +38,12 @@ public class Member {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String email;
 
+    @Column(nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @Column(nullable = false, length = 50)
     private String phoneNumber;
 
@@ -58,6 +65,6 @@ public class Member {
     private LocalDateTime inactiveDate;
 
     //선호 카테고리 선택 받고 싶을 때
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String preferCategory;
 }
